@@ -83,7 +83,7 @@ function App() {
 
   return (
     <div>
-      <h1>Dutar Tuner</h1>
+      <h1 className="text-3xl font-bold underline text-red-600">Dutar Tuner</h1>
 
         <select value={tuningKey} onChange={(e) => setTuningKey(e.target.value)}>
             {Object.entries(TUNINGS).map(([key, t]) => (
