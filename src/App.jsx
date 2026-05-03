@@ -95,7 +95,7 @@ function App() {
 
   return (
     <div>
-      <h1>Uyghur dutar tuner</h1>
+      <h1>Dutar Tuner</h1>
 
         <select value={tuningKey} onChange={(e) => setTuningKey(e.target.value)}>
             {Object.entries(TUNINGS).map(([key, t]) => (
@@ -128,7 +128,27 @@ function App() {
       const targetMidi = closest === 'low' ? tuning.low : tuning.high
       const targetName = midiToName(targetMidi)
       const stringLabel = closest === 'low' ? 'Low string' : 'High string'
-      return <p>Target: {targetName} — {stringLabel}</p>
+
+      const centsFromTarget = Math.round((pitch.midiFloat - targetMidi) * 100)
+      const isInTune = Math.abs(centsFromTarget) <= 5
+
+      let hint
+      if (isInTune) hint = '✓ in tune'
+      else if (centsFromTarget < 0) hint = '↑ tune up'
+      else hint = '↓ tune down'
+
+      return (
+    <div>
+      <p>Target: {targetName} — {stringLabel}</p>
+      <p style={{ 
+        color: isInTune ? 'green' : 'inherit',
+        fontSize: '24px'
+      }}>
+        {hint}
+      </p>
+      <p>{centsFromTarget > 0 ? '+' : ''}{centsFromTarget}¢ from {targetName}</p>
+    </div>
+  ) 
     })()}
   </div>
 ) : (
