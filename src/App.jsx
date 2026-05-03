@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
 import './App.css'
 import { TUNINGS } from './music/tunings.js'
-import { freqToNote, midiToName } from './music/noteMath.js'
+import { freqToNote } from './music/noteMath.js'
 import { detectPitch } from './audio/pitchDetection.js'
+import TuningTarget from './components/TuningTargets.jsx'
 
 function App() {
   const [isListening, setIsListening] = useState(false)
@@ -99,45 +100,15 @@ function App() {
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       <p>Level: {level.toFixed(4)}</p>
       {pitch ? (
-  <div>
-    <p style={{ fontSize: '48px', margin: 0 }}>
-      {pitch.noteName}{pitch.octave}
-    </p>
-    <p>
-      {pitch.cents > 0 ? '+' : ''}{pitch.cents}¢ · {pitch.freq.toFixed(2)} Hz
-    </p>
-    
-    {(() => {
-      const tuning = TUNINGS[tuningKey]
-      const distToLow = Math.abs(pitch.midiFloat - tuning.low)
-      const distToHigh = Math.abs(pitch.midiFloat - tuning.high)
-      const closest = distToLow < distToHigh ? 'low' : 'high'
-      const targetMidi = closest === 'low' ? tuning.low : tuning.high
-      const targetName = midiToName(targetMidi)
-      const stringLabel = closest === 'low' ? 'Low string' : 'High string'
-
-      const centsFromTarget = Math.round((pitch.midiFloat - targetMidi) * 100)
-      const isInTune = Math.abs(centsFromTarget) <= 5
-
-      let hint
-      if (isInTune) hint = '✓ in tune'
-      else if (centsFromTarget < 0) hint = '↑ tune up'
-      else hint = '↓ tune down'
-
-      return (
     <div>
-      <p>Target: {targetName} — {stringLabel}</p>
-      <p style={{ 
-        color: isInTune ? 'green' : 'inherit',
-        fontSize: '24px'
-      }}>
-        {hint}
-      </p>
-      <p>{centsFromTarget > 0 ? '+' : ''}{centsFromTarget}¢ from {targetName}</p>
+        <p style={{ fontSize: '48px', margin: 0 }}>
+        {pitch.noteName}{pitch.octave}
+        </p>
+        <p>
+        {pitch.cents > 0 ? '+' : ''}{pitch.cents}¢ · {pitch.freq.toFixed(2)} Hz
+        </p>
+        <TuningTarget pitch={pitch} tuningKey={tuningKey} />
     </div>
-  ) 
-    })()}
-  </div>
 ) : (
   <p>—</p>
 )}
