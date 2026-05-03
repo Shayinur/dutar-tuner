@@ -1,15 +1,17 @@
 import { useEffect, useState, useRef } from 'react'
 import './App.css'
 
+const NOTE_NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B']
+
 function App() {
   const [isListening, setIsListening] = useState(false)
   const [error, setError] = useState(null)
   const [level, setLevel] = useState(0)
-  const [frequency, setFrequency] = useState(null)
-
   const audioCtxRef = useRef(null)
   const analyserRef = useRef(null)
   const rafIdRef = useRef(null)
+
+  const [pitch, setPitch] = useState(null)
 
   useEffect(() => {
     if (!isListening) return
@@ -44,7 +46,16 @@ function App() {
           // Pitch detection — only if signal is loud enough
           if (rms > 0.01) {
             const freq = detectPitch(buffer, audioCtx.sampleRate)
-            if (freq > 0) setFrequency(freq)
+            if (freq > 0) {
+                const note = freqToNote(freq)
+                setPitch({
+                    freq,
+                    noteName: note.noteName,
+                    octave: note.octave,
+                    cents: note.cents
+                })
+            }
+                
           }
 
           rafIdRef.current = requestAnimationFrame(tick)
@@ -63,7 +74,7 @@ function App() {
       if (stream) stream.getTracks().forEach(track => track.stop())
       if (audioCtxRef.current) audioCtxRef.current.close()
       setLevel(0)
-      setFrequency(null)
+      setFrequency(null) 
     }
   }, [isListening])
 
@@ -79,7 +90,18 @@ function App() {
       </button>
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       <p>Level: {level.toFixed(4)}</p>
-      <p>Frequency: {frequency ? `${frequency.toFixed(2)} Hz` : '—'}</p>
+      {pitch ? (
+  <div>
+    <p style={{ fontSize: '48px', margin: 0 }}>
+      {pitch.noteName}{pitch.octave}
+    </p>
+    <p>
+      {pitch.cents > 0 ? '+' : ''}{pitch.cents}¢ · {pitch.freq.toFixed(2)} Hz
+    </p>
+  </div>
+) : (
+  <p>—</p>
+)}
     </div>
   )
 }
@@ -144,4 +166,12 @@ function detectPitch(buffer, sampleRate) {
   return freq
 }
 
+function freqToNote(freq) {
+    const midiFloat = 69 + 12 * Math.log2(freq / 440);
+    const midi = Math.round(midiFloat)
+    const cents = Math.round((midiFloat - midi) * 100)
+    const noteName = NOTE_NAMES[((midi % 12) + 12) % 12]
+    const octave = Math.floor(midi / 12) - 1
+    return { noteName, octave, cents, midi }
+}
 export default App
