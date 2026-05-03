@@ -1,16 +1,34 @@
-# React + Vite
+# Uyghur Dutar Tuner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web-based chromatic tuner designed specifically for the **Uyghur dutar** (دۇتار) — a two-stringed long-necked lute from Central Asia.
 
-Currently, two official plugins are available:
+🎵 **[Try it live →](https://YOUR-USERNAME.github.io/dutar-tuner/)**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## React Compiler
+## What it does
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Listens through your microphone and detects the pitch of plucked strings in real time
+- Shows the detected note, target string, and how many cents off you are
+- Supports the four most common Uyghur dutar tunings (A3–D4, A3–E4, G3–D4, G3–C4)
+- Visual needle meter for at-a-glance feedback while tuning
 
-## Expanding the ESLint configuration
+## Tech
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Built with **React** and **Vite**, styled with **Tailwind CSS**. Pitch detection uses **autocorrelation with parabolic interpolation** on time-domain audio data from the **Web Audio API** — accurate to within a few cents.
+
+## Running locally
+
+```bash
+git clone https://github.com/YOUR-USERNAME/dutar-tuner.git
+cd dutar-tuner
+npm install
+npm run dev
+```
+
+Then open `http://localhost:5173` and grant microphone access.
+
+## Notes
+
+The dutar has many regional tuning conventions across Uyghur, Uzbek, Tajik, and Turkmen traditions. This tuner targets the most common Uyghur conventions — for other traditions, use the custom tuning option.
+
+Browser microphone access requires HTTPS, so the live demo runs over GitHub Pages' HTTPS. Local development works on `localhost`.
