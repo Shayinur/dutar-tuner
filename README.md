@@ -2,7 +2,7 @@
 
 A web-based chromatic tuner designed specifically for the **Uyghur dutar** (دۇتار) — a two-stringed long-necked lute from Central Asia.
 
-🎵 **[Try it live →](https://YOUR-USERNAME.github.io/dutar-tuner/)**
+🎵 **[Try it live →](https://dutar-tuner.vercel.app)**
 
 
 ## What it does
