@@ -1,7 +1,21 @@
 import { useEffect, useState, useRef } from 'react'
 import './App.css'
 
+const TUNINGS = {
+  'A3-D4': { name: 'A3 - D4 (fourth, common standard)', low: 57, high: 62 },
+  'A3-E4': { name: 'A3 - E4 (fifth)',  low: 57, high: 64 },
+  'G3-D4': { name: 'G3 - D4 (lower, Muqam style)',  low: 55, high: 62 },
+  'G3-C4': { name: 'G3 - C4 (fourth, lower)', low: 55, high: 60 },
+}
+
 const NOTE_NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B']
+
+
+function midiToName(midi) {
+  const noteName = NOTE_NAMES[((midi % 12) + 12) % 12]
+  const octave = Math.floor(midi / 12) - 1
+  return `${noteName}${octave}`
+}
 
 function App() {
   const [isListening, setIsListening] = useState(false)
@@ -10,7 +24,7 @@ function App() {
   const audioCtxRef = useRef(null)
   const analyserRef = useRef(null)
   const rafIdRef = useRef(null)
-
+  const [tuningKey, setTuningKey] = useState('A3-D4')
   const [pitch, setPitch] = useState(null)
 
   useEffect(() => {
@@ -50,6 +64,8 @@ function App() {
                 const note = freqToNote(freq)
                 setPitch({
                     freq,
+                    midiFloat: note.midiFloat,  // need to add this
+                    midi: note.midi,
                     noteName: note.noteName,
                     octave: note.octave,
                     cents: note.cents
@@ -74,13 +90,18 @@ function App() {
       if (stream) stream.getTracks().forEach(track => track.stop())
       if (audioCtxRef.current) audioCtxRef.current.close()
       setLevel(0)
-      setFrequency(null) 
     }
   }, [isListening])
 
   return (
     <div>
       <h1>Uyghur dutar tuner</h1>
+
+        <select value={tuningKey} onChange={(e) => setTuningKey(e.target.value)}>
+            {Object.entries(TUNINGS).map(([key, t]) => (
+            <option key={key} value={key}>{t.name}</option>
+            ))}
+        </select>
       <p>{isListening ? 'Listening...' : 'Tuner is off'}</p>
       <button onClick={() => {
         setError(null)
@@ -98,6 +119,17 @@ function App() {
     <p>
       {pitch.cents > 0 ? '+' : ''}{pitch.cents}¢ · {pitch.freq.toFixed(2)} Hz
     </p>
+    
+    {(() => {
+      const tuning = TUNINGS[tuningKey]
+      const distToLow = Math.abs(pitch.midiFloat - tuning.low)
+      const distToHigh = Math.abs(pitch.midiFloat - tuning.high)
+      const closest = distToLow < distToHigh ? 'low' : 'high'
+      const targetMidi = closest === 'low' ? tuning.low : tuning.high
+      const targetName = midiToName(targetMidi)
+      const stringLabel = closest === 'low' ? 'Low string' : 'High string'
+      return <p>Target: {targetName} — {stringLabel}</p>
+    })()}
   </div>
 ) : (
   <p>—</p>
@@ -172,6 +204,6 @@ function freqToNote(freq) {
     const cents = Math.round((midiFloat - midi) * 100)
     const noteName = NOTE_NAMES[((midi % 12) + 12) % 12]
     const octave = Math.floor(midi / 12) - 1
-    return { noteName, octave, cents, midi }
+    return { midiFloat, midi, noteName, octave, cents } 
 }
 export default App
